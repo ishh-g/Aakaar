@@ -1,6 +1,5 @@
--- Seed Accounts & Demo Data
--- Default Demo Password: 'demopassword123' (bcrypt hashed below)
 -- Location: Bharati Vidyapeeth's College of Engineering (BVCOE), A-4 Paschim Vihar, New Delhi (28.6773° N, 77.1130° E)
+--baadmein sahi karungi
 
 INSERT INTO users (email, password_hash, role)
 VALUES 
@@ -16,7 +15,7 @@ VALUES
     (3, 'Rajesh Kumar', 'rajesh@example.com')
 ON CONFLICT (owner_id) DO NOTHING;
 
--- 1. Insert 10 Parcels clustered around BVCOE Paschim Vihar (28.6773, 77.1130)
+-- 10 parcel add karne hain around BVCOE Paschim Vihar (28.6773, 77.1130)
 INSERT INTO parcels (parcel_id, ulpin_2d, boundary_geom, area_sqm)
 VALUES 
     (1, 'DELHI110001P01', ST_GeomFromText('POLYGON((77.1125 28.6768, 77.1129 28.6768, 77.1129 28.6772, 77.1125 28.6772, 77.1125 28.6768))', 4326), 1000.0),
@@ -31,19 +30,18 @@ VALUES
     (10, 'DELHI110001P10', ST_GeomFromText('POLYGON((77.1141 28.6778, 77.1146 28.6778, 77.1146 28.6782, 77.1141 28.6782, 77.1141 28.6778))', 4326), 1800.0)
 ON CONFLICT (parcel_id) DO NOTHING;
 
--- 2. Insert 6 Buildings across parcels
--- Note: Building 3 on Parcel 3 has a footprint extending outside Parcel 3 boundary (Boundary Violation Conflict)
+--Building 3 on Parcel 3 has a footprint extending outside Parcel 3 boundary , Boundary Violation Conflict aayega 
 INSERT INTO buildings (building_id, parcel_id, footprint_geom, total_floors)
 VALUES 
     (1, 1, ST_GeomFromText('POLYGON((77.1126 28.6769, 77.1128 28.6769, 77.1128 28.6771, 77.1126 28.6771, 77.1126 28.6769))', 4326), 3),
     (2, 2, ST_GeomFromText('POLYGON((77.1131 28.6769, 77.1133 28.6769, 77.1133 28.6771, 77.1131 28.6771, 77.1131 28.6769))', 4326), 4),
-    (3, 3, ST_GeomFromText('POLYGON((77.1137 28.6769, 77.1142 28.6769, 77.1142 28.6771, 77.1137 28.6771, 77.1137 28.6769))', 4326), 3), -- extends beyond 77.1140 boundary
+    (3, 3, ST_GeomFromText('POLYGON((77.1137 28.6769, 77.1142 28.6769, 77.1142 28.6771, 77.1137 28.6771, 77.1137 28.6769))', 4326), 3), -- extends beyond 77.1140 boundary hereeeee
     (4, 4, ST_GeomFromText('POLYGON((77.1126 28.6774, 77.1128 28.6774, 77.1128 28.6776, 77.1126 28.6776, 77.1126 28.6774))', 4326), 3),
     (5, 5, ST_GeomFromText('POLYGON((77.1131 28.6774, 77.1133 28.6774, 77.1133 28.6776, 77.1131 28.6776, 77.1131 28.6774))', 4326), 3),
     (6, 6, ST_GeomFromText('POLYGON((77.1136 28.6774, 77.1139 28.6774, 77.1139 28.6776, 77.1136 28.6776, 77.1136 28.6774))', 4326), 2)
 ON CONFLICT (building_id) DO NOTHING;
 
--- 3. Insert 19 Properties across the 6 Buildings
+-- yaha 19 buildings add karni hai
 INSERT INTO properties (
     property_id, ulpin_3d, building_id, parcel_id, owner_id, floor_number, unit_index, 
     elevation_min_m, elevation_max_m, footprint_geom, area_sqm, verification_status
@@ -82,7 +80,7 @@ VALUES
     (19, 'DELHI110001P06-B01F01U02', 6, 6, 3, 1, 2, 3.0, 6.0, ST_GeomFromText('POLYGON((77.1136 28.6774, 77.1139 28.6774, 77.1139 28.6776, 77.1136 28.6776, 77.1136 28.6774))', 4326), 650.2, 'conflict')
 ON CONFLICT (property_id) DO NOTHING;
 
--- Seed Initial Conflict Logs (11 baseline logs matching the 7 PostGIS geometric checks)
+-- Seed Initial Conflict Logs (11 baseline logs matching the 7 PostGIS geometric checks) done done doneee
 INSERT INTO conflict_logs (property_id_a, property_id_b, conflict_type, resolved)
 VALUES 
     -- Building 3 Boundary Violations & Building-Parcel Mismatches (Properties 8, 9, 10)
@@ -97,7 +95,7 @@ VALUES
     (16, 15, 'overlap', FALSE),
     (15, 16, 'floor_overlap', FALSE),
     (16, 15, 'floor_overlap', FALSE),
-    -- Building 6 Duplicate Property (Properties 18 and 19)
+    -- Building 6 Duplicate Property (Properties 18 and 19) 
     (18, 19, 'duplicate', FALSE)
 ON CONFLICT DO NOTHING;
 
