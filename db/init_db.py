@@ -10,7 +10,7 @@ DB_NAME = os.getenv("DB_NAME", "ulpin_db")
 
 def init_database():
     try:
-        # First connect to default postgres DB to create ulpin_db if missing
+      
         conn = psycopg2.connect(
             host=DB_HOST,
             port=DB_PORT,
@@ -32,7 +32,7 @@ def init_database():
         cur.close()
         conn.close()
 
-        # Connect to target DB
+     
         conn = psycopg2.connect(
             host=DB_HOST,
             port=DB_PORT,
@@ -43,21 +43,21 @@ def init_database():
         conn.autocommit = True
         cur = conn.cursor()
 
-        # Read and execute schema.sql
+      
         schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
         with open(schema_path, "r", encoding="utf-8") as f:
             schema_sql = f.read()
         cur.execute(schema_sql)
         print("Schema DDL applied successfully.")
 
-        # Read and execute seed.sql
+        
         seed_path = os.path.join(os.path.dirname(__file__), "seed.sql")
         with open(seed_path, "r", encoding="utf-8") as f:
             seed_sql = f.read()
         cur.execute(seed_sql)
         print("Seed data applied successfully.")
 
-        # Confirm PostGIS version
+
         cur.execute("SELECT PostGIS_Full_Version();")
         postgis_ver = cur.fetchone()[0]
         print(f"PostGIS Version: {postgis_ver}")
