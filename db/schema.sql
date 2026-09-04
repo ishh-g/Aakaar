@@ -1,9 +1,8 @@
--- 3D ULPIN Generation & Vertical Property Mapping System - Schema
--- Database: PostgreSQL + PostGIS
+
 
 CREATE EXTENSION IF NOT EXISTS postgis;
 
--- Clean drop existing tables for deterministic reset
+
 DROP TABLE IF EXISTS conflict_logs CASCADE;
 DROP TABLE IF EXISTS properties CASCADE;
 DROP TABLE IF EXISTS buildings CASCADE;
@@ -11,7 +10,7 @@ DROP TABLE IF EXISTS parcels CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS owners CASCADE;
 
--- Enum Types
+
 DO $$ BEGIN
     CREATE TYPE user_role AS ENUM ('admin', 'surveyor', 'citizen');
 EXCEPTION
@@ -38,14 +37,14 @@ EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
--- 1. Owner Table
+-- sabse pehle Owner Table
 CREATE TABLE owners (
     owner_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     contact_info VARCHAR(255)
 );
 
--- 2. User Table
+-- dooseri User Table
 CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -53,7 +52,7 @@ CREATE TABLE IF NOT EXISTS users (
     role user_role NOT NULL DEFAULT 'citizen'
 );
 
--- 3. Parcel Table
+-- third Parcel Table
 CREATE TABLE IF NOT EXISTS parcels (
     parcel_id SERIAL PRIMARY KEY,
     ulpin_2d VARCHAR(14) UNIQUE NOT NULL,
@@ -61,7 +60,7 @@ CREATE TABLE IF NOT EXISTS parcels (
     area_sqm DOUBLE PRECISION NOT NULL
 );
 
--- 4. Building Table
+-- fourth is Building Table
 CREATE TABLE IF NOT EXISTS buildings (
     building_id SERIAL PRIMARY KEY,
     parcel_id INT NOT NULL REFERENCES parcels(parcel_id) ON DELETE CASCADE,
@@ -69,7 +68,7 @@ CREATE TABLE IF NOT EXISTS buildings (
     total_floors INT NOT NULL DEFAULT 1
 );
 
--- 5. Property (3D volume) Table
+-- 5. fifth hai Property (3D volume) Table
 CREATE TABLE IF NOT EXISTS properties (
     property_id SERIAL PRIMARY KEY,
     ulpin_3d VARCHAR(30) UNIQUE NOT NULL,
@@ -87,7 +86,7 @@ CREATE TABLE IF NOT EXISTS properties (
     CONSTRAINT unique_property_tuple UNIQUE (parcel_id, building_id, floor_number, unit_index)
 );
 
--- 6. ConflictLog Table
+-- sixxxxxxx ConflictLog Table
 CREATE TABLE IF NOT EXISTS conflict_logs (
     conflict_id SERIAL PRIMARY KEY,
     property_id_a INT NOT NULL REFERENCES properties(property_id) ON DELETE CASCADE,
@@ -97,7 +96,7 @@ CREATE TABLE IF NOT EXISTS conflict_logs (
     resolved BOOLEAN NOT NULL DEFAULT FALSE
 );
 
--- Spatial Indexes
+-- baaki Spatial Indexes
 CREATE INDEX IF NOT EXISTS idx_parcels_boundary ON parcels USING GIST (boundary_geom);
 CREATE INDEX IF NOT EXISTS idx_buildings_footprint ON buildings USING GIST (footprint_geom);
 CREATE INDEX IF NOT EXISTS idx_properties_footprint ON properties USING GIST (footprint_geom);
