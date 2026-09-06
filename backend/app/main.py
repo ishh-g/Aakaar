@@ -21,7 +21,7 @@ app = FastAPI(
 # Local dev works with zero setup (localhost defaults below).
 # Hosted deploys: set FRONTEND_URL to the live frontend address
 # (comma-separated if more than one), e.g. FRONTEND_URL=https://aakaar.vercel.app
-_configured_origins = [u.strip() for u in os.getenv("FRONTEND_URL", "").split(",") if u.strip()]
+_configured_origins = [u.strip().rstrip("/") for u in os.getenv("FRONTEND_URL", "").split(",") if u.strip()]
 _allow_origins = _configured_origins + ["http://localhost:5173", "http://127.0.0.1:5173"]
 app.add_middleware(
     CORSMiddleware,
