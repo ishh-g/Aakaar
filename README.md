@@ -1,6 +1,6 @@
-# Aakaar
+# Aakaar - Vertical Property Mapping & Spatial Conflict Detection System (SIH26011)
 
-3D land-record system generating vertical ULPINs from GIS data, with automated conflict detection. Built for SIH26011.
+Aakaar is a production-grade prototype for 3D Property Volume Segmentation, Vertical 3D ULPIN Encoding, Spatial Conflict Detection, and CesiumJS 3D Visualization.
 
 ## Stack
 - Frontend: React + CesiumJS

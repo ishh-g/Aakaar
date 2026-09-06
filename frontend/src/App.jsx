@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import LoginScreen from './components/LoginScreen';
 import CesiumGlobe from './components/CesiumGlobe';
-import SearchBar from './components/SearchBar';
+import Header from './components/Header';
 import PropertyDetailPanel from './components/PropertyDetailPanel';
 import StatsSummaryBar from './components/StatsSummaryBar';
 import LegendPanel from './components/LegendPanel';
@@ -111,68 +111,24 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <header className="header">
-        <div className="header-left">
-          <div className="header-title">
-            <span className="logo-badge">SIH26011</span>
-            <h1>3D ULPIN Cadastre Portal</h1>
-          </div>
+      <Header
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        conflictsCount={conflicts.length}
+        propertiesList={propertiesList}
+        onSelectProperty={(prop) => {
+          setSelectedProperty(prop);
+          if (activeTab !== 'map') {
+            setActiveTab('map');
+          }
+        }}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+      />
 
-          <nav className="header-nav">
-            <button
-              className={`nav-tab ${activeTab === 'map' ? 'active' : ''}`}
-              onClick={() => setActiveTab('map')}
-            >
-              &#127757; 3D Globe Map
-            </button>
-            <button
-              className={`nav-tab ${activeTab === 'conflicts' ? 'active' : ''}`}
-              onClick={() => setActiveTab('conflicts')}
-            >
-              &#9888; Conflicts Dashboard
-              {conflicts.length > 0 && (
-                <span className="conflicts-counter">{conflicts.length}</span>
-              )}
-            </button>
-            <button
-              className={`nav-tab ${activeTab === 'reports' ? 'active' : ''}`}
-              onClick={() => setActiveTab('reports')}
-            >
-              &#128202; Reports & Analytics
-            </button>
-            <button
-              className={`nav-tab ${activeTab === 'generator' ? 'active' : ''}`}
-              onClick={() => setActiveTab('generator')}
-            >
-              &#9889; ULPIN Generator
-            </button>
-          </nav>
-        </div>
-
+      <main className="app-main">
         {activeTab === 'map' && (
-          <SearchBar
-            properties={propertiesList}
-            onSelectProperty={(prop) => setSelectedProperty(prop)}
-          />
-        )}
-
-        <div className="header-right">
-          <div className="user-profile-badge">
-            <span className={`user-role-pill role-${currentUser.role}`}>
-              {currentUser.role.toUpperCase()}
-            </span>
-            <span className="user-email">{currentUser.email}</span>
-          </div>
-
-          <button className="logout-btn" onClick={handleLogout} title="Sign Out">
-            Sign Out
-          </button>
-        </div>
-      </header>
-
-      <main style={{ flex: 1, position: 'relative' }}>
-        {activeTab === 'map' && (
-          <>
+          <div className="map-view-container">
             <CesiumGlobe
               mapData={mapData}
               conflicts={conflicts}
@@ -194,7 +150,7 @@ export default function App() {
                 onVerify={handleVerifyProperty}
               />
             )}
-          </>
+          </div>
         )}
 
         {activeTab === 'conflicts' && (

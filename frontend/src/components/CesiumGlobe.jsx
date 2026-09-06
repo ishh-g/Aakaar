@@ -19,6 +19,10 @@ export default function CesiumGlobe({
 
   useEffect(() => {
     if (!containerRef.current) return;
+    // Guard against React 18 StrictMode double-mount creating a second
+    // (zombie) Viewer whose dead canvas would sit on top and swallow
+    // wheel/pinch events meant for the live map.
+    if (viewerRef.current && !viewerRef.current.isDestroyed()) return;
 
     // 1. Initialize Cesium Viewer
     const viewer = new Cesium.Viewer(containerRef.current, {
@@ -33,6 +37,18 @@ export default function CesiumGlobe({
       infoBox: false,
       selectionIndicator: false,
     });
+
+    // Manual navigation must stay enabled: wheel/pinch zoom, rotate, tilt.
+    // Set explicitly (never disable, including during the initial fly-to)
+    // so users can freely zoom after the initial camera position loads.
+    const controller = viewer.scene.screenSpaceCameraController;
+    controller.enableZoom = true;
+    controller.enableRotate = true;
+    controller.enableTilt = true;
+    controller.enableTranslate = true;
+    controller.enableLook = true;
+    controller.minimumZoomDistance = 1.0;
+    controller.maximumZoomDistance = Number.POSITIVE_INFINITY;
 
     // Darker / sharper atmospheric rendering
     viewer.scene.globe.enableLighting = false;
@@ -53,6 +69,38 @@ export default function CesiumGlobe({
     if (viewerInstanceRef) {
       viewerInstanceRef.current = viewer;
     }
+    // Expose for debugging / automated verification of camera behaviour.
+    if (typeof window !== 'undefined') {
+      window.__cesiumViewer = viewer;
+    }
+
+    // Trackpad pinch-to-zoom arrives as Ctrl/Meta+wheel, which Cesium's
+    // default zoom bindings ignore (while still swallowing the event, so
+    // even the browser won't page-zoom) — the gesture feels completely
+    // dead. Handle it here with exponential scaling. Plain wheel events
+    // are left alone so Cesium keeps its zoom-to-cursor + inertia feel
+    // with no risk of double-zooming.
+    const canvas = viewer.scene.canvas;
+    const handlePinchWheel = (e) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const ctrl = viewer.scene.screenSpaceCameraController;
+      if (!ctrl || !ctrl.enableZoom) return;
+      const carto = viewer.camera.positionCartographic;
+      if (!carto) return;
+      let delta = e.deltaY;
+      if (e.deltaMode === 1) delta *= 16; // lines -> px
+      else if (e.deltaMode === 2) delta *= window.innerHeight; // pages -> px
+      const targetHeight = Math.min(
+        Math.max(carto.height * Math.exp(delta * 0.0022), ctrl.minimumZoomDistance * 2.0),
+        Number.isFinite(ctrl.maximumZoomDistance) ? ctrl.maximumZoomDistance : 1.0e7
+      );
+      const amount = carto.height - targetHeight;
+      if (amount > 0) viewer.camera.zoomIn(amount);
+      else if (amount < 0) viewer.camera.zoomOut(-amount);
+    };
+    canvas.addEventListener('wheel', handlePinchWheel, { passive: false, capture: true });
 
     // 2. Click Handler to pick 3D Property Volume
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -70,10 +118,17 @@ export default function CesiumGlobe({
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
     return () => {
+      canvas.removeEventListener('wheel', handlePinchWheel, { capture: true });
       handler.destroy();
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {
         viewerRef.current.destroy();
-        viewerRef.current = null;
+      }
+      viewerRef.current = null;
+      if (viewerInstanceRef) {
+        viewerInstanceRef.current = null;
+      }
+      if (typeof window !== 'undefined' && window.__cesiumViewer === viewer) {
+        window.__cesiumViewer = null;
       }
     };
   }, []);

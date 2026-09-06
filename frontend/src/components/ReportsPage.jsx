@@ -41,14 +41,20 @@ export default function ReportsPage({ summary, onRefresh }) {
           <p>Real-time vertical cadastre statistics and PostGIS topological validation metrics</p>
         </div>
         <button className="reports-refresh-btn" onClick={onRefresh}>
-          &#8635; Refresh Live Metrics
+          Refresh Live Metrics
         </button>
       </div>
 
       {/* Top Level Summary Cards */}
       <div className="reports-cards-grid">
         <div className="report-card">
-          <div className="card-icon">&#128506;</div>
+          <div className="card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+          </div>
           <div className="card-content">
             <span className="card-title">Total Land Parcels</span>
             <span className="card-number">{parcels_total}</span>
@@ -57,7 +63,19 @@ export default function ReportsPage({ summary, onRefresh }) {
         </div>
 
         <div className="report-card">
-          <div className="card-icon">&#127970;</div>
+          <div className="card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+              <line x1="9" y1="22" x2="9" y2="22.01"></line>
+              <line x1="15" y1="22" x2="15" y2="22.01"></line>
+              <line x1="9" y1="6" x2="9" y2="6.01"></line>
+              <line x1="15" y1="6" x2="15" y2="6.01"></line>
+              <line x1="9" y1="10" x2="9" y2="10.01"></line>
+              <line x1="15" y1="10" x2="15" y2="10.01"></line>
+              <line x1="9" y1="14" x2="9" y2="14.01"></line>
+              <line x1="15" y1="14" x2="15" y2="14.01"></line>
+            </svg>
+          </div>
           <div className="card-content">
             <span className="card-title">Total Buildings</span>
             <span className="card-number">{buildings_total}</span>
@@ -66,7 +84,13 @@ export default function ReportsPage({ summary, onRefresh }) {
         </div>
 
         <div className="report-card">
-          <div className="card-icon">&#128392;</div>
+          <div className="card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </div>
           <div className="card-content">
             <span className="card-title">3D Property Units</span>
             <span className="card-number">{properties_total}</span>
@@ -75,7 +99,13 @@ export default function ReportsPage({ summary, onRefresh }) {
         </div>
 
         <div className="report-card report-card-alert">
-          <div className="card-icon">&#9888;</div>
+          <div className="card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
           <div className="card-content">
             <span className="card-title">Active Conflict Logs</span>
             <span className="card-number">{total_unresolved_conflicts}</span>

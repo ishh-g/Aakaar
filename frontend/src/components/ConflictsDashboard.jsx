@@ -100,7 +100,7 @@ export default function ConflictsDashboard({ conflicts, user, onVerify, onInspec
                         onClick={() => onInspectProperty(c.property_id_a)}
                         title="Locate on 3D Cesium Map"
                       >
-                        &#127757; Inspect 3D
+                        Inspect on 3D Map
                       </button>
 
                       {canVerify ? (

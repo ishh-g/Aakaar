@@ -116,14 +116,10 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
     <div className="generator-container">
       <div className="generator-header">
         <div>
-          <h2>3D ULPIN Generation Engine</h2>
+          <h2>3D ULPIN Generator</h2>
           <p>
             Interactive demonstration of Section 4 standard 3D Unique Land Parcel Identification Number assembly
           </p>
-        </div>
-        <div className="generator-spec-tag">
-          <span>SPEC SIH26011</span>
-          <code>&lt;2D_ULPIN&gt;-B&lt;NN&gt;F&lt;NN&gt;U&lt;NN&gt;</code>
         </div>
       </div>
 
@@ -133,7 +129,6 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
         <div className="generator-card">
           <div className="generator-card-header">
             <h3>1. Configure Spatial Parameters</h3>
-            <span className="card-badge">Read-Only Demo Mode</span>
           </div>
 
           <div className="generator-form">
@@ -208,7 +203,7 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
               onClick={handleGenerate}
               disabled={generationState.loading}
             >
-              {generationState.loading ? 'Generating...' : '⚡ Assemble 3D ULPIN'}
+              {generationState.loading ? 'Generating...' : 'Assemble 3D ULPIN'}
             </button>
           </div>
         </div>
@@ -222,14 +217,18 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
                 className="copy-btn"
                 onClick={() => handleCopy(generationState.data?.final_ulpin_3d)}
               >
-                {copied ? '✓ Copied!' : '📋 Copy 3D ULPIN'}
+                {copied ? 'Copied to Clipboard' : 'Copy 3D ULPIN'}
               </button>
             )}
           </div>
 
           {!generationState.active ? (
             <div className="reveal-placeholder">
-              <div className="reveal-placeholder-icon">&#128736;</div>
+              <div className="reveal-placeholder-icon">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                </svg>
+              </div>
               <p>Configure parameters on the left and click <strong>"Assemble 3D ULPIN"</strong> to watch the standard hierarchical code generation in real time.</p>
             </div>
           ) : (
@@ -367,7 +366,7 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
                         onClick={() => handleLoadSample(prop)}
                         title="Load parameters into generator"
                       >
-                        &#8593; Load
+                        Load
                       </button>
                     </td>
                   </tr>

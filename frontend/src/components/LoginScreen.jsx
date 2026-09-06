@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import aakaarLogo from '../assets/aakaar-logo.jpeg';
 
 export default function LoginScreen({ onLoginSuccess }) {
   const [email, setEmail] = useState('admin@demo.com');
@@ -41,8 +42,10 @@ export default function LoginScreen({ onLoginSuccess }) {
     <div className="login-wrapper">
       <div className="login-card">
         <div className="login-header">
-          <div className="logo-badge">SIH26011</div>
-          <h2>3D ULPIN Cadastre Portal</h2>
+          <div className="aakaar-logo-badge login-logo-badge">
+            <img src={aakaarLogo} alt="Aakaar Logo" className="aakaar-logo-img" />
+          </div>
+          <h2>Aakaar</h2>
           <p>Vertical Property Mapping & Spatial Conflict Detection System</p>
         </div>
 
@@ -72,7 +75,7 @@ export default function LoginScreen({ onLoginSuccess }) {
           </div>
 
           <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? 'Authenticating...' : 'Sign In to 3D Cadastre'}
+            {loading ? 'Authenticating...' : 'Sign In to Aakaar'}
           </button>
         </form>
 
@@ -104,10 +107,6 @@ export default function LoginScreen({ onLoginSuccess }) {
               <small>citizen@demo.com</small>
             </button>
           </div>
-        </div>
-
-        <div className="login-footer">
-          <span>Target Locality: Bharati Vidyapeeth's College of Engineering (BVCOE), New Delhi</span>
         </div>
       </div>
     </div>
