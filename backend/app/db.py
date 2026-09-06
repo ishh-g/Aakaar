@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlsplit
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
@@ -15,6 +16,17 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL",
     f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}",
 )
+
+# Startup diagnostic: show WHICH database target is active (never the
+# password) so hosted-deploy issues are visible in the server logs.
+try:
+    _parts = urlsplit(DATABASE_URL)
+    print(
+        f"[aakaar] DB target: {_parts.username}@{_parts.hostname}:{_parts.port}/{_parts.path.lstrip('/')}",
+        flush=True,
+    )
+except Exception as _e:
+    print(f"[aakaar] DB target unparseable: {_e}", flush=True)
 
 engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
