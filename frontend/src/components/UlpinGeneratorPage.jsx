@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../api.js';
 
 export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectProperty }) {
   // Extract unique parcels from mapData or provide default 10 BVCOE parcels
@@ -55,7 +56,7 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
         unit_idx: unitIdx
       });
 
-      const res = await fetch(`http://localhost:8000/ulpin/preview?${query.toString()}`);
+      const res = await fetch(`${API_BASE_URL}/ulpin/preview?${query.toString()}`);
       if (!res.ok) throw new Error('Preview API error');
       const data = await res.json();
 

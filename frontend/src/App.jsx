@@ -8,6 +8,7 @@ import LegendPanel from './components/LegendPanel';
 import ConflictsDashboard from './components/ConflictsDashboard';
 import ReportsPage from './components/ReportsPage';
 import UlpinGeneratorPage from './components/UlpinGeneratorPage';
+import { API_BASE_URL } from './api.js';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -27,10 +28,10 @@ export default function App() {
   const fetchAllData = async () => {
     try {
       const [healthRes, tilesRes, conflictsRes, summaryRes] = await Promise.all([
-        fetch('http://localhost:8000/health').then(r => r.json()),
-        fetch('http://localhost:8000/map/tiles').then(r => r.json()),
-        fetch('http://localhost:8000/properties/conflicts').then(r => r.json()),
-        fetch('http://localhost:8000/reports/summary').then(r => r.json())
+        fetch(`${API_BASE_URL}/health`).then(r => r.json()),
+        fetch(`${API_BASE_URL}/map/tiles`).then(r => r.json()),
+        fetch(`${API_BASE_URL}/properties/conflicts`).then(r => r.json()),
+        fetch(`${API_BASE_URL}/reports/summary`).then(r => r.json())
       ]);
 
       if (healthRes.status === 'ok') {
@@ -77,7 +78,7 @@ export default function App() {
     if (!currentUser || !currentUser.access_token) return;
 
     try {
-      const verifyRes = await fetch(`http://localhost:8000/properties/${propertyId}/verify`, {
+      const verifyRes = await fetch(`${API_BASE_URL}/properties/${propertyId}/verify`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${currentUser.access_token}`

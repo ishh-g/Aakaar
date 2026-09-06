@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from app.api.health import router as health_router
 from app.api.auth import router as auth_router
 from app.api.parcels import router as parcels_router
@@ -16,10 +17,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS
+# Configure CORS.
+# Local dev works with zero setup (localhost defaults below).
+# Hosted deploys: set FRONTEND_URL to the live frontend address
+# (comma-separated if more than one), e.g. FRONTEND_URL=https://aakaar.vercel.app
+_configured_origins = [u.strip() for u in os.getenv("FRONTEND_URL", "").split(",") if u.strip()]
+_allow_origins = _configured_origins + ["http://localhost:5173", "http://127.0.0.1:5173"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

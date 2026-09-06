@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import aakaarLogo from '../assets/aakaar-logo.jpeg';
+import { API_BASE_URL } from '../api.js';
 
 export default function LoginScreen({ onLoginSuccess }) {
   const [email, setEmail] = useState('admin@demo.com');
@@ -13,7 +14,7 @@ export default function LoginScreen({ onLoginSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password })
