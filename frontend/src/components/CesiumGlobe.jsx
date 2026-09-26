@@ -13,6 +13,7 @@ export default function CesiumGlobe({
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
   const propertyEntitiesRef = useRef(new Map());
+  const parcelEntitiesRef = useRef(new Map());
   const skipFirstLocationRef = useRef(true);
 
   // BVCOE Paschim Vihar, Delhi geospatial center
@@ -142,6 +143,7 @@ export default function CesiumGlobe({
 
     viewer.entities.removeAll();
     propertyEntitiesRef.current.clear();
+    parcelEntitiesRef.current.clear();
 
     mapData.features.forEach((feature) => {
       const { geometry, properties } = feature;
@@ -153,7 +155,7 @@ export default function CesiumGlobe({
       if (layer === 'parcel') {
         const coords = geometry.coordinates[0];
         const flatCoords = coords.flat();
-        viewer.entities.add({
+        const parcelEntity = viewer.entities.add({
           name: `Parcel ${properties.ulpin_2d}`,
           polygon: {
             hierarchy: Cesium.Cartesian3.fromDegreesArray(flatCoords),
@@ -164,6 +166,9 @@ export default function CesiumGlobe({
             height: 0.2
           }
         });
+        if (properties.parcel_id != null) {
+          parcelEntitiesRef.current.set(properties.parcel_id, parcelEntity);
+        }
       }
 
       // B. 3D Extruded Property Volumes
@@ -227,12 +232,28 @@ export default function CesiumGlobe({
   }, [selectedProperty]);
 
   // 5. Fly camera when the active demo location changes.
+  // Locks onto the exact parcel polygon when known (single-parcel sites);
+  // falls back to coordinate flight for multi-parcel clusters (BVCOE).
   // Skips the first render because mount already flies to BVCOE.
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer || !activeLocation) return;
     if (skipFirstLocationRef.current) {
       skipFirstLocationRef.current = false;
+      return;
+    }
+    const parcelEntity = activeLocation.parcelId != null
+      ? parcelEntitiesRef.current.get(activeLocation.parcelId)
+      : null;
+    if (parcelEntity) {
+      viewer.flyTo(parcelEntity, {
+        offset: new Cesium.HeadingPitchRange(
+          Cesium.Math.toRadians(0.0),
+          Cesium.Math.toRadians(-50.0),
+          220
+        ),
+        duration: 1.5
+      });
       return;
     }
     viewer.camera.flyTo({
@@ -248,7 +269,7 @@ export default function CesiumGlobe({
       },
       duration: 1.5
     });
-  }, [activeLocation]);
+  }, [activeLocation, mapData]);
 
   return (
     <div 
