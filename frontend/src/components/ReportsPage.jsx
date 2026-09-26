@@ -28,7 +28,9 @@ export default function ReportsPage({ summary, onRefresh }) {
     { type: 'building_parcel_mismatch', label: 'Building-Parcel Mismatch', count: conflicts_by_type.building_parcel_mismatch || 0, color: '#3b82f6' },
     { type: 'overlap', label: '3D Spatial Overlap', count: conflicts_by_type.overlap || 0, color: '#f59e0b' },
     { type: 'floor_overlap', label: 'Floor Level Overlap', count: conflicts_by_type.floor_overlap || 0, color: '#ec4899' },
-    { type: 'duplicate', label: 'Duplicate Property', count: conflicts_by_type.duplicate || 0, color: '#a855f7' }
+    { type: 'duplicate', label: 'Duplicate Property', count: conflicts_by_type.duplicate || 0, color: '#a855f7' },
+    { type: 'area_mismatch', label: 'Area Mismatch', count: conflicts_by_type.area_mismatch || 0, color: '#22d3ee' },
+    { type: 'elevation_conflict', label: 'Elevation Conflict', count: conflicts_by_type.elevation_conflict || 0, color: '#fb7185' }
   ];
 
   const maxConflictCount = Math.max(...conflictEntries.map(e => e.count), 1);
@@ -58,7 +60,7 @@ export default function ReportsPage({ summary, onRefresh }) {
           <div className="card-content">
             <span className="card-title">Total Land Parcels</span>
             <span className="card-number">{parcels_total}</span>
-            <span className="card-sub">BVCOE Cadastral Zone</span>
+            <span className="card-sub">West Delhi Demo Zone</span>
           </div>
         </div>
 

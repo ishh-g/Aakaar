@@ -14,7 +14,7 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
         }));
       if (parcels.length > 0) return parcels;
     }
-    // Fallback standard 10 parcels
+    // Fallback standard parcels (offline only; live list comes from mapData)
     return Array.from({ length: 10 }, (_, i) => ({
       parcel_id: i + 1,
       ulpin_2d: `DELHI110001P${String(i + 1).padStart(2, '0')}`,
@@ -320,7 +320,7 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
       <div className="reference-table-container">
         <div className="reference-table-header">
           <div>
-            <h3>Active 3D Properties in Demo Locality (BVCOE New Delhi)</h3>
+            <h3>Active 3D Properties across Demo Localities (West Delhi, New Delhi)</h3>
             <p>Real seeded database records conforming to the 3D ULPIN hierarchical standard</p>
           </div>
           <span className="ref-count-badge">
@@ -344,7 +344,7 @@ export default function UlpinGeneratorPage({ mapData, propertiesList, onInspectP
             </thead>
             <tbody>
               {propertiesList && propertiesList.length > 0 ? (
-                propertiesList.slice(0, 10).map((prop) => (
+                propertiesList.map((prop) => (
                   <tr key={prop.property_id}>
                     <td>
                       <span className="id-badge">#{prop.property_id}</span>

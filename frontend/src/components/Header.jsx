@@ -65,7 +65,7 @@ export default function Header({
       <div className="header-right">
         <div className="header-doc-ref" title="Official Cadastral Document Reference ID">
           <span className="doc-ref-prefix">REF:</span>
-          <span className="doc-ref-id">DL-BVCOE-2026</span>
+          <span className="doc-ref-id">DL-WEST-2026</span>
         </div>
 
         {currentUser && (
