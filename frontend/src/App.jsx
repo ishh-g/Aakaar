@@ -10,14 +10,15 @@ import ReportsPage from './components/ReportsPage';
 import UlpinGeneratorPage from './components/UlpinGeneratorPage';
 import { API_BASE_URL } from './api.js';
 
-// Demo site presets: BVCOE (original) + 4 expansion sites.
-// Coordinates match db/seed.sql and db/seed_new_sites.sql parcel locations.
+// Demo site presets: BVCOE (original) + 4 expansion sites + Bharat Mandapam.
+// Coordinates match db/seed.sql, db/seed_new_sites.sql and db/seed_bharat_mandapam.sql parcel locations.
 const LOCATIONS = [
   { id: 'bvcoe', label: 'BVCOE College', lon: 77.1130, lat: 28.6773, parcelId: null },
   { id: 'balaji', label: 'Balaji Hospital', lon: 77.11025, lat: 28.67375, parcelId: 11 },
   { id: 'school', label: 'Indraprastha School', lon: 77.1080, lat: 28.6710, parcelId: 14 },
   { id: 'jwala', label: 'Jwala Heri Market', lon: 77.1019, lat: 28.6672, parcelId: 13 },
   { id: 'pacific', label: 'Pacific Mall', lon: 77.10655, lat: 28.6424, parcelId: 12 },
+  { id: 'bharat', label: 'Bharat Mandapam', lon: 77.2425, lat: 28.6194, parcelId: 15 },
 ];
 
 export default function App() {

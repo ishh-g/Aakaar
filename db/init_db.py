@@ -57,13 +57,14 @@ def init_database():
         cur.execute(seed_sql)
         print("Seed data applied successfully.")
 
-        # Expansion sites (BVCOE + 4 locations). Optional file; skipped if absent.
-        extra_seed_path = os.path.join(os.path.dirname(__file__), "seed_new_sites.sql")
-        if os.path.exists(extra_seed_path):
-            with open(extra_seed_path, "r", encoding="utf-8") as f:
-                extra_seed_sql = f.read()
-            cur.execute(extra_seed_sql)
-            print("Expansion-site seed data applied successfully.")
+        # Expansion sites (BVCOE + 4 locations) + Bharat Mandapam. Optional files; skipped if absent.
+        for extra_file in ("seed_new_sites.sql", "seed_bharat_mandapam.sql"):
+            extra_seed_path = os.path.join(os.path.dirname(__file__), extra_file)
+            if os.path.exists(extra_seed_path):
+                with open(extra_seed_path, "r", encoding="utf-8") as f:
+                    extra_seed_sql = f.read()
+                cur.execute(extra_seed_sql)
+                print(f"Expansion-site seed data applied successfully ({extra_file}).")
 
 
         cur.execute("SELECT PostGIS_Full_Version();")
