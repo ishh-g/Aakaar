@@ -10,6 +10,16 @@ import ReportsPage from './components/ReportsPage';
 import UlpinGeneratorPage from './components/UlpinGeneratorPage';
 import { API_BASE_URL } from './api.js';
 
+// Demo site presets: BVCOE (original) + 4 expansion sites.
+// Coordinates match db/seed.sql and db/seed_new_sites.sql parcel locations.
+const LOCATIONS = [
+  { id: 'bvcoe', label: 'BVCOE College', lon: 77.1130, lat: 28.6773 },
+  { id: 'balaji', label: 'Balaji Hospital', lon: 77.11025, lat: 28.67375 },
+  { id: 'school', label: 'Indraprastha School', lon: 77.1080, lat: 28.6710 },
+  { id: 'jwala', label: 'Jwala Heri Market', lon: 77.1019, lat: 28.6672 },
+  { id: 'pacific', label: 'Pacific Mall', lon: 77.10655, lat: 28.6424 },
+];
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = sessionStorage.getItem('ulpin_auth_user');
@@ -22,6 +32,7 @@ export default function App() {
   const [summary, setSummary] = useState(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [backendStatus, setBackendStatus] = useState('Connecting...');
+  const [activeLocation, setActiveLocation] = useState(LOCATIONS[0]);
   const viewerInstanceRef = useRef(null);
 
   // Fetch all map data, conflicts, and summary analytics
@@ -136,11 +147,28 @@ export default function App() {
               selectedProperty={selectedProperty}
               onSelectProperty={(prop) => setSelectedProperty(prop)}
               viewerInstanceRef={viewerInstanceRef}
+              activeLocation={activeLocation}
             />
+
+            <div className="location-switcher">
+              {LOCATIONS.map((loc) => (
+                <button
+                  key={loc.id}
+                  className={`loc-btn ${activeLocation.id === loc.id ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveLocation(loc);
+                    setSelectedProperty(null);
+                  }}
+                  title={`Fly to ${loc.label}`}
+                >
+                  {loc.label}
+                </button>
+              ))}
+            </div>
 
             <StatsSummaryBar summary={summary} />
 
-            <LegendPanel />
+            <LegendPanel locationName={activeLocation.label} />
 
             {selectedProperty && (
               <PropertyDetailPanel

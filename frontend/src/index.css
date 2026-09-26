@@ -2038,3 +2038,56 @@ body, html, #root {
   background: var(--gold-accent);
   color: #0a1420;
 }
+
+/* ==========================================================================
+   8. Demo Location Switcher (multi-site fly-to presets)
+   ========================================================================== */
+.location-switcher {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: var(--navy-primary);
+  border: 1px solid var(--border-navy);
+  border-radius: 2px;
+  padding: 6px;
+  z-index: 10;
+  box-shadow: var(--shadow-lg);
+  max-width: min(640px, calc(100% - 560px));
+}
+
+.loc-btn {
+  background: var(--dark-input-navy);
+  border: 1px solid var(--border-navy);
+  color: var(--muted-blue-gray);
+  padding: 6px 10px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-family);
+  white-space: nowrap;
+}
+
+.loc-btn:hover {
+  color: var(--offwhite-text);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.loc-btn.active {
+  background: rgba(212, 175, 55, 0.18);
+  border-color: var(--gold-accent);
+  color: var(--gold-accent);
+}
+
+@media (max-width: 1100px) {
+  .location-switcher {
+    max-width: calc(100% - 48px);
+    top: 64px;
+  }
+}

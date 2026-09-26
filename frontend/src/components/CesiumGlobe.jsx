@@ -7,11 +7,13 @@ export default function CesiumGlobe({
   conflicts, 
   selectedProperty, 
   onSelectProperty,
-  viewerInstanceRef 
+  viewerInstanceRef,
+  activeLocation
 }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
   const propertyEntitiesRef = useRef(new Map());
+  const skipFirstLocationRef = useRef(true);
 
   // BVCOE Paschim Vihar, Delhi geospatial center
   const BVCOE_LON = 77.1130;
@@ -223,6 +225,30 @@ export default function CesiumGlobe({
       });
     }
   }, [selectedProperty]);
+
+  // 5. Fly camera when the active demo location changes.
+  // Skips the first render because mount already flies to BVCOE.
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || !activeLocation) return;
+    if (skipFirstLocationRef.current) {
+      skipFirstLocationRef.current = false;
+      return;
+    }
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(
+        activeLocation.lon,
+        activeLocation.lat - 0.0018,
+        380
+      ),
+      orientation: {
+        heading: Cesium.Math.toRadians(0.0),
+        pitch: Cesium.Math.toRadians(-42.0),
+        roll: 0.0
+      },
+      duration: 1.5
+    });
+  }, [activeLocation]);
 
   return (
     <div 

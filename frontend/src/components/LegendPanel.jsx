@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function LegendPanel() {
+export default function LegendPanel({ locationName }) {
   return (
     <div className="legend-panel">
       <div className="legend-title">3D Cadastre Legend</div>
@@ -23,7 +23,7 @@ export default function LegendPanel() {
         </div>
       </div>
       <div className="legend-footer">
-        <span>Location: BVCOE Paschim Vihar, Delhi</span>
+        <span>Location: {locationName || 'BVCOE Paschim Vihar, Delhi'}</span>
       </div>
     </div>
   );
