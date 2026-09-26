@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { getSiteForParcel } from '../sites.js';
 
 export default function SearchBar({ properties, onSelectProperty }) {
   const [query, setQuery] = useState('');
@@ -13,8 +14,13 @@ export default function SearchBar({ properties, onSelectProperty }) {
       const matchBuilding = `building ${p.building_id}`.toLowerCase().includes(q);
       const matchParcel = `parcel ${p.parcel_id}`.toLowerCase().includes(q);
       const matchOwner = (p.owner_name || p.owner?.name || '').toLowerCase().includes(q);
-      return matchUlpin || matchId || matchBuilding || matchParcel || matchOwner;
-    }).slice(0, 8);
+      // Match by human-readable site / building name, e.g. "bharat mandapam".
+      const site = getSiteForParcel(p.parcel_id);
+      const matchSite =
+        site.name.toLowerCase().includes(q) ||
+        (site.aliases || []).some((a) => a.toLowerCase().includes(q));
+      return matchUlpin || matchId || matchBuilding || matchParcel || matchOwner || matchSite;
+    }).slice(0, 10);
   }, [query, properties]);
 
   const handleSelect = (prop) => {
@@ -38,7 +44,7 @@ export default function SearchBar({ properties, onSelectProperty }) {
         <input
           type="text"
           className="search-input"
-          placeholder="Search ULPIN, Property..."
+          placeholder="Search building name, ULPIN, owner..."
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -62,9 +68,9 @@ export default function SearchBar({ properties, onSelectProperty }) {
               onClick={() => handleSelect(prop)}
             >
               <div className="search-item-main">
-                <span className="search-ulpin">{prop.ulpin_3d}</span>
+                <span className="search-ulpin">{getSiteForParcel(prop.parcel_id).name}</span>
                 <span className="search-sub">
-                  Building #{prop.building_id} &bull; Floor {prop.floor_number} &bull; {prop.elevation_min_m}-{prop.elevation_max_m}m
+                  {prop.ulpin_3d} &bull; Building #{prop.building_id} &bull; Floor {prop.floor_number} &bull; {prop.elevation_min_m}-{prop.elevation_max_m}m
                 </span>
               </div>
               <span
