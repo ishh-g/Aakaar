@@ -5,7 +5,10 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field, ConfigDict
 from app.db import get_db
 from app.models.entities import Property, ConflictLog, User
-from app.services.conflicts import run_all_conflict_checks
+from app.services.conflicts import (
+    run_all_conflict_checks,
+    get_unresolved_conflicts_with_severity,
+)
 from app.core.auth import require_roles
 
 router = APIRouter(prefix="/properties", tags=["Conflicts"])
@@ -22,6 +25,11 @@ class ConflictLogResponse(BaseModel):
     conflict_type: str
     detected_at: Any
     resolved: bool
+    # 3D overlap severity, computed on every request. Only populated for
+    # two-property conflict types (overlap, floor_overlap, duplicate);
+    # null for every other type or when a referenced property is missing.
+    overlap_volume_m3: Optional[float] = None
+    overlap_pct: Optional[float] = None
 
 @router.post("/conflicts/check", status_code=status.HTTP_200_OK)
 def trigger_conflict_check(
@@ -52,10 +60,11 @@ def list_unresolved_conflicts(
 ):
     """
     GET /properties/conflicts
-    Lists all unresolved spatial conflict logs.
+    Lists all unresolved spatial conflict logs, each enriched with the
+    severity of its 3D overlap (volume in m3 and percentage of the smaller
+    property's volume). Severity is computed on read; nothing is stored.
     """
-    logs = db.query(ConflictLog).filter(ConflictLog.resolved == False).order_by(ConflictLog.conflict_id.asc()).all()
-    return logs
+    return get_unresolved_conflicts_with_severity(db)
 
 @router.post("/{property_id}/verify", status_code=status.HTTP_200_OK)
 def manually_verify_property(

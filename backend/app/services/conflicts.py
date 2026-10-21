@@ -1,7 +1,141 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from app.models.entities import Property, ConflictLog
+
+# Conflict types that involve two properties and therefore have a measurable
+# 3D overlap volume. All other types (boundary_violation, area_mismatch, ...)
+# report null severity.
+SEVERITY_CONFLICT_TYPES = frozenset({"overlap", "floor_overlap", "duplicate"})
+
+
+def calculate_overlap_severity(
+    overlap_area_m2: Optional[float],
+    overlap_height_m: Optional[float],
+    volume_a_m3: Optional[float],
+    volume_b_m3: Optional[float],
+) -> Tuple[Optional[float], Optional[float]]:
+    """
+    Convert raw geometric metrics into (overlap_volume_m3, overlap_pct).
+
+    overlap_volume_m3 = footprint intersection area * overlapping height
+    overlap_pct       = overlap_volume_m3 / smaller property volume * 100
+
+    Returns (None, None) when there is no genuine 3D overlap (touching
+    boundaries, disjoint footprints, or non-overlapping elevation ranges) or
+    when either property is missing/has invalid dimensions.
+    """
+    try:
+        if overlap_area_m2 is None or overlap_height_m is None:
+            return (None, None)
+
+        area_m2 = float(overlap_area_m2)
+        height_m = float(overlap_height_m)
+        if area_m2 <= 0.0 or height_m <= 0.0:
+            return (None, None)
+
+        if (
+            volume_a_m3 is None
+            or volume_b_m3 is None
+            or float(volume_a_m3) <= 0.0
+            or float(volume_b_m3) <= 0.0
+        ):
+            return (None, None)
+
+        smaller_volume_m3 = min(float(volume_a_m3), float(volume_b_m3))
+        overlap_volume_m3 = area_m2 * height_m
+        overlap_pct = (overlap_volume_m3 / smaller_volume_m3) * 100.0
+
+        return (round(overlap_volume_m3, 2), round(overlap_pct, 2))
+    except (TypeError, ValueError, ZeroDivisionError):
+        # Malformed numeric data must never take the conflicts endpoint down.
+        return (None, None)
+
+
+def get_unresolved_conflicts_with_severity(db: Session) -> List[Dict[str, Any]]:
+    """
+    Fetch every unresolved conflict log together with its overlap severity.
+
+    One query computes, per log:
+      - intersection area of both footprints as true ground area
+        (PostGIS geography -> square metres on the WGS84 ellipsoid, so no
+        Web-Mercator distortion at Delhi's latitude),
+      - the height of the overlapping elevation band,
+      - both properties' full volumes (true ground area * height).
+
+    LEFT JOINs are deliberate: a conflict row whose property no longer exists
+    yields NULL metrics and therefore null severity instead of a 500.
+    Severity is only calculated for two-property conflict types.
+    """
+    stmt = text("""
+        SELECT
+            cl.conflict_id,
+            cl.property_id_a,
+            cl.property_id_b,
+            cl.conflict_type,
+            cl.detected_at,
+            cl.resolved,
+            CASE
+                WHEN cl.conflict_type NOT IN ('overlap', 'floor_overlap', 'duplicate')
+                     OR cl.property_id_b IS NULL
+                     OR p1.property_id IS NULL
+                     OR p2.property_id IS NULL
+                THEN NULL
+                ELSE ST_Area(
+                    ST_Intersection(p1.footprint_geom, p2.footprint_geom)::geography
+                )
+            END AS overlap_area_m2,
+            CASE
+                WHEN cl.conflict_type NOT IN ('overlap', 'floor_overlap', 'duplicate')
+                     OR cl.property_id_b IS NULL
+                     OR p1.property_id IS NULL
+                     OR p2.property_id IS NULL
+                THEN NULL
+                ELSE GREATEST(
+                    0.0,
+                    LEAST(p1.elevation_max_m, p2.elevation_max_m)
+                    - GREATEST(p1.elevation_min_m, p2.elevation_min_m)
+                )
+            END AS overlap_height_m,
+            ST_Area(p1.footprint_geom::geography)
+                * (p1.elevation_max_m - p1.elevation_min_m) AS volume_a_m3,
+            ST_Area(p2.footprint_geom::geography)
+                * (p2.elevation_max_m - p2.elevation_min_m) AS volume_b_m3
+        FROM conflict_logs cl
+        LEFT JOIN properties p1 ON p1.property_id = cl.property_id_a
+        LEFT JOIN properties p2 ON p2.property_id = cl.property_id_b
+        WHERE cl.resolved = FALSE
+        ORDER BY cl.conflict_id ASC;
+    """)
+
+    rows = db.execute(stmt).fetchall()
+    enriched: List[Dict[str, Any]] = []
+
+    for row in rows:
+        overlap_volume_m3: Optional[float] = None
+        overlap_pct: Optional[float] = None
+
+        if row.conflict_type in SEVERITY_CONFLICT_TYPES:
+            overlap_volume_m3, overlap_pct = calculate_overlap_severity(
+                overlap_area_m2=row.overlap_area_m2,
+                overlap_height_m=row.overlap_height_m,
+                volume_a_m3=row.volume_a_m3,
+                volume_b_m3=row.volume_b_m3,
+            )
+
+        enriched.append({
+            "conflict_id": row.conflict_id,
+            "property_id_a": row.property_id_a,
+            "property_id_b": row.property_id_b,
+            "conflict_type": row.conflict_type,
+            "detected_at": row.detected_at,
+            "resolved": row.resolved,
+            "overlap_volume_m3": overlap_volume_m3,
+            "overlap_pct": overlap_pct,
+        })
+
+    return enriched
+
 
 def check_property_overlap(db: Session, property_id: int) -> List[Dict[str, Any]]:
     """

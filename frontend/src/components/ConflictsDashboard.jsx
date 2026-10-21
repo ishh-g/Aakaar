@@ -1,8 +1,31 @@
 import React, { useState } from 'react';
 
+// Stretch goal: colour-code overlap severity. Thresholds are on the
+// overlap percentage of the smaller property's volume.
+function severityBadgeStyle(pct) {
+  const color = pct >= 50 ? '#ef4444' : pct >= 10 ? '#f59e0b' : '#22c55e';
+  return {
+    display: 'inline-block',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    border: `1px solid ${color}`,
+    backgroundColor: `${color}22`,
+    color,
+    fontWeight: 600,
+    fontSize: '0.75rem',
+  };
+}
+
+function severityLabel(pct) {
+  if (pct >= 50) return 'High';
+  if (pct >= 10) return 'Medium';
+  return 'Low';
+}
+
 export default function ConflictsDashboard({ conflicts, user, onVerify, onInspectProperty }) {
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortDir, setSortDir] = useState(null); // null | 'desc' | 'asc'
 
   const canVerify = user && (user.role === 'admin' || user.role === 'surveyor');
 
@@ -17,6 +40,20 @@ export default function ConflictsDashboard({ conflicts, user, onVerify, onInspec
       c.conflict_type.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  // Sorting is applied after filtering/searching so both keep working.
+  // Rows without a severity (non-overlap conflicts) always sort last.
+  const orderedConflicts = (() => {
+    if (!sortDir) return filteredConflicts;
+    return [...filteredConflicts].sort((a, b) => {
+      const aVol = a.overlap_volume_m3;
+      const bVol = b.overlap_volume_m3;
+      if (aVol == null && bVol == null) return 0;
+      if (aVol == null) return 1;
+      if (bVol == null) return -1;
+      return sortDir === 'desc' ? bVol - aVol : aVol - bVol;
+    });
+  })();
 
   return (
     <div className="dashboard-container">
@@ -57,14 +94,23 @@ export default function ConflictsDashboard({ conflicts, user, onVerify, onInspec
               <th>Primary Property (A)</th>
               <th>Conflicting Target (B)</th>
               <th>Conflict Classification</th>
+              <th
+                onClick={() => setSortDir((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
+                title="Sort by 3D overlap volume"
+                style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+              >
+                Overlap Volume (m³){' '}
+                {sortDir === 'desc' ? '▼' : sortDir === 'asc' ? '▲' : '↕'}
+              </th>
+              <th>Overlap %</th>
               <th>Detected Timestamp</th>
               <th>Resolution Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredConflicts.length > 0 ? (
-              filteredConflicts.map((c) => (
+            {orderedConflicts.length > 0 ? (
+              orderedConflicts.map((c) => (
                 <tr key={c.conflict_id}>
                   <td>
                     <span className="id-badge">#{c.conflict_id}</span>
@@ -83,6 +129,30 @@ export default function ConflictsDashboard({ conflicts, user, onVerify, onInspec
                     <span className={`conflict-type-pill type-${c.conflict_type}`}>
                       {c.conflict_type.toUpperCase().replace(/_/g, ' ')}
                     </span>
+                  </td>
+                  <td>
+                    {c.overlap_volume_m3 != null ? (
+                      <span style={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+                        {Number(c.overlap_volume_m3).toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}{' '}
+                        m³
+                      </span>
+                    ) : (
+                      <span className="text-muted">—</span>
+                    )}
+                  </td>
+                  <td>
+                    {c.overlap_pct != null ? (
+                      <span
+                        style={severityBadgeStyle(c.overlap_pct)}
+                        title={`${severityLabel(c.overlap_pct)} overlap severity`}
+                      >
+                        {Number(c.overlap_pct).toFixed(2)}%
+                      </span>
+                    ) : (
+                      <span className="text-muted">—</span>
+                    )}
                   </td>
                   <td>
                     {new Date(c.detected_at).toLocaleString([], {
@@ -119,7 +189,7 @@ export default function ConflictsDashboard({ conflicts, user, onVerify, onInspec
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="empty-table">
+                <td colSpan="9" className="empty-table">
                   No spatial conflicts found matching criteria.
                 </td>
               </tr>
