@@ -1183,6 +1183,14 @@ body, html, #root {
   color: var(--gold-accent);
 }
 
+.property-site-label {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted-blue-gray);
+  letter-spacing: 0.02em;
+}
+
 .conflict-type-pill {
   font-size: 10px;
   font-weight: 800;

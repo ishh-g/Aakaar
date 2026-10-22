@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { getSiteForParcel } from '../sites';
 
 // Stretch goal: colour-code overlap severity. Thresholds are on the
 // overlap percentage of the smaller property's volume.
@@ -22,7 +23,7 @@ function severityLabel(pct) {
   return 'Low';
 }
 
-export default function ConflictsDashboard({ conflicts, user, onVerify, onInspectProperty }) {
+export default function ConflictsDashboard({ conflicts, mapData, user, onVerify, onInspectProperty }) {
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortDir, setSortDir] = useState(null); // null | 'desc' | 'asc'
@@ -31,13 +32,33 @@ export default function ConflictsDashboard({ conflicts, user, onVerify, onInspec
 
   const conflictTypes = ['ALL', 'overlap', 'boundary_violation', 'duplicate', 'floor_overlap', 'building_parcel_mismatch'];
 
+  // The conflicts API only returns property IDs; mapData carries the
+  // property -> parcel relation, so we can show/search the real site name.
+  const propertySites = useMemo(() => {
+    const map = new Map();
+    for (const feature of mapData?.features || []) {
+      const props = feature.properties || {};
+      if (props.layer === 'property' && props.property_id != null) {
+        map.set(props.property_id, getSiteForParcel(props.parcel_id).name);
+      }
+    }
+    return map;
+  }, [mapData]);
+
+  const siteFor = (propertyId) => propertySites.get(propertyId) || null;
+
   const filteredConflicts = conflicts.filter((c) => {
     const matchesFilter = filterType === 'ALL' || c.conflict_type === filterType;
+    const query = searchQuery.toLowerCase();
+    const siteA = (siteFor(c.property_id_a) || '').toLowerCase();
+    const siteB = (c.property_id_b ? siteFor(c.property_id_b) || '' : '').toLowerCase();
     const matchesSearch = 
       c.conflict_id.toString().includes(searchQuery) ||
       c.property_id_a.toString().includes(searchQuery) ||
       (c.property_id_b && c.property_id_b.toString().includes(searchQuery)) ||
-      c.conflict_type.toLowerCase().includes(searchQuery.toLowerCase());
+      c.conflict_type.toLowerCase().includes(query) ||
+      siteA.includes(query) ||
+      siteB.includes(query);
     return matchesFilter && matchesSearch;
   });
 
@@ -117,10 +138,18 @@ export default function ConflictsDashboard({ conflicts, user, onVerify, onInspec
                   </td>
                   <td>
                     <strong>Property #{c.property_id_a}</strong>
+                    {siteFor(c.property_id_a) && (
+                      <div className="property-site-label">{siteFor(c.property_id_a)}</div>
+                    )}
                   </td>
                   <td>
                     {c.property_id_b ? (
-                      <strong>Property #{c.property_id_b}</strong>
+                      <>
+                        <strong>Property #{c.property_id_b}</strong>
+                        {siteFor(c.property_id_b) && (
+                          <div className="property-site-label">{siteFor(c.property_id_b)}</div>
+                        )}
+                      </>
                     ) : (
                       <span className="text-muted">N/A (Cadastral Boundary)</span>
                     )}

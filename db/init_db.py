@@ -57,8 +57,9 @@ def init_database():
         cur.execute(seed_sql)
         print("Seed data applied successfully.")
 
-        # Expansion sites (BVCOE + 4 locations) + Bharat Mandapam. Optional files; skipped if absent.
-        for extra_file in ("seed_new_sites.sql", "seed_bharat_mandapam.sql"):
+        # Expansion sites (BVCOE + 4 locations) + Bharat Mandapam + IIIT-Delhi.
+        # Optional files; skipped if absent.
+        for extra_file in ("seed_new_sites.sql", "seed_bharat_mandapam.sql", "seed_iiit_delhi.sql"):
             extra_seed_path = os.path.join(os.path.dirname(__file__), extra_file)
             if os.path.exists(extra_seed_path):
                 with open(extra_seed_path, "r", encoding="utf-8") as f:

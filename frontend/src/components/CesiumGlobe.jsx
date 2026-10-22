@@ -250,7 +250,7 @@ export default function CesiumGlobe({
         offset: new Cesium.HeadingPitchRange(
           Cesium.Math.toRadians(0.0),
           Cesium.Math.toRadians(-50.0),
-          220
+          activeLocation.range ?? 220
         ),
         duration: 1.5
       });

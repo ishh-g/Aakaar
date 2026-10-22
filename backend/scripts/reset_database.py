@@ -32,8 +32,8 @@ def reset_database():
         with open(seed_path, "r", encoding="utf-8") as f:
             cur.execute(f.read())
 
-        # Expansion sites + Bharat Mandapam (optional, idempotent).
-        for extra_name in ("seed_new_sites.sql", "seed_bharat_mandapam.sql"):
+        # Expansion sites + Bharat Mandapam + IIIT-Delhi (optional, idempotent).
+        for extra_name in ("seed_new_sites.sql", "seed_bharat_mandapam.sql", "seed_iiit_delhi.sql"):
             extra_path = project_root / "db" / extra_name
             if extra_path.exists():
                 print(f"Executing extra seed data from: {extra_path}")

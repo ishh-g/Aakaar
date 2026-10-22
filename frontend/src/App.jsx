@@ -10,8 +10,9 @@ import ReportsPage from './components/ReportsPage';
 import UlpinGeneratorPage from './components/UlpinGeneratorPage';
 import { API_BASE_URL } from './api.js';
 
-// Demo site presets: BVCOE (original) + 4 expansion sites + Bharat Mandapam.
-// Coordinates match db/seed.sql, db/seed_new_sites.sql and db/seed_bharat_mandapam.sql parcel locations.
+// Demo site presets: BVCOE (original) + 4 expansion sites + Bharat Mandapam + IIIT-Delhi.
+// Coordinates match db/seed.sql, db/seed_new_sites.sql, db/seed_bharat_mandapam.sql
+// and db/seed_iiit_delhi.sql parcel locations.
 const LOCATIONS = [
   { id: 'bvcoe', label: 'BVCOE College', lon: 77.1130, lat: 28.6773, parcelId: null },
   { id: 'balaji', label: 'Balaji Hospital', lon: 77.11025, lat: 28.67375, parcelId: 11 },
@@ -19,6 +20,7 @@ const LOCATIONS = [
   { id: 'jwala', label: 'Jwala Heri Market', lon: 77.1019, lat: 28.6672, parcelId: 13 },
   { id: 'pacific', label: 'Pacific Mall', lon: 77.10655, lat: 28.6424, parcelId: 12 },
   { id: 'bharat', label: 'Bharat Mandapam', lon: 77.2425, lat: 28.6194, parcelId: 15 },
+  { id: 'iiit', label: 'IIIT Delhi', lon: 77.2733, lat: 28.5463, parcelId: 16, range: 800 },
 ];
 
 export default function App() {
@@ -186,6 +188,7 @@ export default function App() {
         {activeTab === 'conflicts' && (
           <ConflictsDashboard
             conflicts={conflicts}
+            mapData={mapData}
             user={currentUser}
             onVerify={handleVerifyProperty}
             onInspectProperty={handleInspectProperty}

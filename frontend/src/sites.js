@@ -2,7 +2,8 @@
 //
 // The /map/tiles API only returns numeric parcel_id / building_id, so this
 // module maps those IDs to the real-world site names seeded in
-// db/seed.sql, db/seed_new_sites.sql and db/seed_bharat_mandapam.sql.
+// db/seed.sql, db/seed_new_sites.sql, db/seed_bharat_mandapam.sql
+// and db/seed_iiit_delhi.sql.
 // Parcels 1-10 (BVCOE cluster) fall back to DEFAULT_SITE.
 
 export const SITES_BY_PARCEL = {
@@ -25,6 +26,10 @@ export const SITES_BY_PARCEL = {
   15: {
     name: 'Bharat Mandapam',
     aliases: ['Bharat', 'Mandapam', 'Pragati Maidan', 'IECC', 'Convention Centre'],
+  },
+  16: {
+    name: 'IIIT Delhi',
+    aliases: ['IIIT', 'IIITD', 'IIIT-Delhi', 'Okhla', 'Indraprastha Institute'],
   },
 };
 
