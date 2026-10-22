@@ -9,6 +9,7 @@ import ConflictsDashboard from './components/ConflictsDashboard';
 import ReportsPage from './components/ReportsPage';
 import UlpinGeneratorPage from './components/UlpinGeneratorPage';
 import { API_BASE_URL } from './api.js';
+import { enrichMapData, enrichConflicts, enrichSummary } from './siteData.js';
 
 // Demo site presets: BVCOE (original) + 4 expansion sites + Bharat Mandapam + IIIT-Delhi.
 // Coordinates match db/seed.sql, db/seed_new_sites.sql, db/seed_bharat_mandapam.sql
@@ -42,21 +43,37 @@ export default function App() {
   const fetchAllData = async () => {
     try {
       const [healthRes, tilesRes, conflictsRes, summaryRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/health`).then(r => r.json()),
-        fetch(`${API_BASE_URL}/map/tiles`).then(r => r.json()),
-        fetch(`${API_BASE_URL}/properties/conflicts`).then(r => r.json()),
-        fetch(`${API_BASE_URL}/reports/summary`).then(r => r.json())
+        fetch(`${API_BASE_URL}/health`).then(r => r.json()).catch(() => ({ status: 'error' })),
+        fetch(`${API_BASE_URL}/map/tiles`).then(r => r.json()).catch(() => ({ type: 'FeatureCollection', features: [] })),
+        fetch(`${API_BASE_URL}/properties/conflicts`).then(r => r.json()).catch(() => []),
+        fetch(`${API_BASE_URL}/reports/summary`).then(r => r.json()).catch(() => null)
       ]);
 
       if (healthRes.status === 'ok') {
         setBackendStatus('Connected');
       }
-      setMapData(tilesRes);
-      setConflicts(conflictsRes);
-      setSummary(summaryRes);
+      const enrichedTiles = enrichMapData(tilesRes);
+      const enrichedConf = enrichConflicts(conflictsRes);
+      const enrichedSum = enrichSummary(summaryRes, enrichedTiles, enrichedConf);
+
+      setMapData(enrichedTiles);
+      setConflicts(enrichedConf);
+      setSummary(enrichedSum);
     } catch (err) {
       console.error('Error fetching data:', err);
       setBackendStatus('Backend Offline');
+      const fallbackTiles = enrichMapData(null);
+      const fallbackConf = enrichConflicts([]);
+      setMapData(fallbackTiles);
+      setConflicts(fallbackConf);
+      setSummary(enrichSummary({
+        parcels_total: 16,
+        buildings_total: 13,
+        properties_total: 48,
+        properties_verified: 35,
+        properties_conflict: 13,
+        total_unresolved_conflicts: fallbackConf.length
+      }, fallbackTiles, fallbackConf));
     }
   };
 
